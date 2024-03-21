@@ -1,5 +1,6 @@
 import promptAction from '@ohos.promptAction'
 import hilog from '@ohos.hilog'
+import router from '@ohos.router'
 
 @Entry
 @Component
@@ -8,23 +9,23 @@ struct Index {
   @State hideAuthor: boolean = false
 
   onPageShow() {
-    hilog.warn(1, 'Index', `Index onPageShow `)
+    hilog.warn(1, 'testTag', `Index onPageShow `)
   }
 
   onPageHide() {
-    hilog.warn(1, 'Index', `Index onPageHide `)
+    hilog.warn(1, 'testTag', `Index onPageHide `)
   }
 
   onBackPress() {
-    hilog.warn(1, 'Index', `Index onBackPress `)
+    hilog.warn(1, 'testTag', `Index onBackPress `)
   }
 
   aboutToAppear() {
-    hilog.warn(1, 'Index', `Index aboutToAppear `)
+    hilog.warn(1, 'testTag', `Index aboutToAppear `)
   }
 
   aboutToDisappear() {
-    hilog.warn(1, 'Index', `Index aboutToDisappear `)
+    hilog.warn(1, 'testTag', `Index aboutToDisappear `)
   }
 
   @Builder
@@ -75,10 +76,15 @@ struct Index {
         Row() {
           this.doContentRender()
         }
+
+        Button('push to next page')
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/Page2' });
+          })
       }
       .width('100%')
       //默认为居中
-      .alignItems(HorizontalAlign.Start)
+      .alignItems(HorizontalAlign.Center)
       //使用匿名函数表达式配置组件的事件方法，要求使用bind，以确保函数体中的this指向当前组件
       .onClick(function(event){
         this.message = 'Clicked Column '
@@ -110,14 +116,14 @@ struct LineDivider {
 
   onPageShow() {
     //执行不到,只有@Entry回回调此方法
-    hilog.warn(1, 'Index', `LineDivider aboutToAppear `)
+    hilog.warn(1, 'testTag', `LineDivider aboutToAppear `)
   }
 
   aboutToAppear() {
-    hilog.warn(1, 'Index', `LineDivider aboutToAppear `)
+    hilog.warn(1, 'testTag', `LineDivider aboutToAppear `)
   }
 
   aboutToDisappear() {
-    hilog.warn(1, 'Index', `LineDivider aboutToDisappear `)
+    hilog.warn(1, 'testTag', `LineDivider aboutToDisappear `)
   }
 }
