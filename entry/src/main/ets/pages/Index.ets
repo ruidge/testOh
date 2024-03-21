@@ -1,29 +1,123 @@
+import promptAction from '@ohos.promptAction'
+import hilog from '@ohos.hilog'
+
 @Entry
 @Component
 struct Index {
   @State message: string = 'Hello World'
+  @State hideAuthor: boolean = false
+
+  onPageShow() {
+    hilog.warn(1, 'Index', `Index onPageShow `)
+  }
+
+  onPageHide() {
+    hilog.warn(1, 'Index', `Index onPageHide `)
+  }
+
+  onBackPress() {
+    hilog.warn(1, 'Index', `Index onBackPress `)
+  }
+
+  aboutToAppear() {
+    hilog.warn(1, 'Index', `Index aboutToAppear `)
+  }
+
+  aboutToDisappear() {
+    hilog.warn(1, 'Index', `Index aboutToDisappear `)
+  }
+
+  @Builder
+  doAuthorRender() {
+    if (!this.hideAuthor) {
+      Text($r('app.string.author'))
+        .fontSize(30)
+        .stateStyles({
+          focused: {
+            .backgroundColor(Color.Pink)
+          },
+          pressed: {
+            .backgroundColor(Color.Black)
+          },
+          normal: {
+            .backgroundColor(Color.Red)
+          }
+        })
+        .onClick(() => {
+          this.hideAuthor = true
+        })
+    }
+  }
+
+  @Builder
+  doContentRender() {
+    Text(this.message)
+      .fontSize(50)
+        // .width('100%')
+        // .height('100%')
+        // .textAlign(TextAlign.Center)
+      .fontWeight(FontWeight.Bold)
+        //使用声明的箭头函数，可以直接调用，不需要bind this
+      .onClick((event) => {
+        this.message = `Clicked Text `
+        // promptAction.showToast({ message: `x:${event.x},y:${event.y}` })
+        promptAction.showDialog({ message: `x:${event.x},y:${event.y}` }).then(() => {
+          promptAction.showToast({ message: `showDialog then ` })
+        })
+      })
+  }
 
   build() {
     Row() {
       Column() {
-        Text(this.message)
-          .fontSize(50)
-          // .width('100%')
-          // .height('100%')
-          // .textAlign(TextAlign.Center)
-          .fontWeight(FontWeight.Bold)
-          .onClick(() => {
-            this.message = 'Clicked Text '
-          })
+        this.doAuthorRender()
+        LineDivider({ color: Color.Blue, lHeight: 2 })
+        Row() {
+          this.doContentRender()
+        }
       }
       .width('100%')
-      .onClick(() => {
+      //默认为居中
+      .alignItems(HorizontalAlign.Start)
+      //使用匿名函数表达式配置组件的事件方法，要求使用bind，以确保函数体中的this指向当前组件
+      .onClick(function(event){
         this.message = 'Clicked Column '
-      })
+      }.bind(this))
     }
+    //默认为居中
+    // .alignItems(VerticalAlign.Bottom)
     .height('100%')
-    .onClick(() => {
-      this.message = 'Clicked Row '
-    })
+    //使用组件的成员函数配置组件的事件方法
+    .onClick(this.clickRowCallback.bind(this))
+  }
+
+  clickRowCallback(): void {
+    this.message = 'Clicked Row '
+  }
+}
+
+@Component
+struct LineDivider {
+  private color: ResourceColor = Color.Transparent
+  private lHeight: Length = 0
+
+  build() {
+    Divider()
+      .margin({ left: 20, right: 20 })
+      .height(this.lHeight)
+      .backgroundColor(this.color)
+  }
+
+  onPageShow() {
+    //执行不到,只有@Entry回回调此方法
+    hilog.warn(1, 'Index', `LineDivider aboutToAppear `)
+  }
+
+  aboutToAppear() {
+    hilog.warn(1, 'Index', `LineDivider aboutToAppear `)
+  }
+
+  aboutToDisappear() {
+    hilog.warn(1, 'Index', `LineDivider aboutToDisappear `)
   }
 }

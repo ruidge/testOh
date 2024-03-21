@@ -3,6 +3,10 @@
     {
       "name": "app_name",
       "value": "HelloApplication"
+    },
+    {
+      "name": "author",
+      "value": "rui.zhang"
     }
   ]
 }
