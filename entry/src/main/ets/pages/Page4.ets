@@ -58,7 +58,7 @@ struct Page3 {
 @Component
 struct ArticleCard {
   // @ObjectLink
-  article: Article;
+  article: Article | null = null;
 
   build() {
     Row() {
@@ -68,18 +68,18 @@ struct ArticleCard {
         .margin({ right: 20 })
 
       Column() {
-        Text(this.article.title)
+        Text(this.article?.title)
           .fontSize(20)
           .margin({ bottom: 8 })
-        Text(this.article.brief)
+        Text(this.article?.brief)
           .fontSize(16)
           .fontColor(Color.Gray)
           .margin({ bottom: 8 })
-        Text(this.article.liked + "")
+        Text(this.article?.liked + "")
           .fontSize(16)
           .fontColor(Color.Gray)
           .margin({ bottom: 8 })
-        Text(this.article.count + "")
+        Text(this.article?.count + "")
           .fontSize(16)
           .fontColor(Color.Gray)
           .margin({ bottom: 8 })
@@ -89,8 +89,10 @@ struct ArticleCard {
       .height('100%')
     }
     .onClick(() => {
-      this.article.liked = true
-      this.article.count++
+      if (this.article != null) {
+        this.article.liked = true
+        this.article.count++
+      }
     })
     .margin({ left: 20, right: 20 })
     .padding({ left: 20, right: 20 })

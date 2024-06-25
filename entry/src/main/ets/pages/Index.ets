@@ -100,9 +100,10 @@ struct Index {
         //默认为居中
         .alignItems(HorizontalAlign.Center)
         //使用匿名函数表达式配置组件的事件方法，要求使用bind，以确保函数体中的this指向当前组件
-        .onClick(function(event){
-          this.message = 'Clicked Column '
-        }.bind(this))
+        //update: 11开始不支持
+        // .onClick(function(event){
+        //   this.message = 'Clicked Column '
+        // }.bind(this))
       }
       //默认为居中
       // .alignItems(VerticalAlign.Bottom)

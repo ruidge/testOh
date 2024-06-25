@@ -32,7 +32,8 @@ struct Page2 {
 
   label: string = `Parent`
 
-  @Builder componentBuilder() {
+  @Builder
+  componentBuilder() {
     //label名字相同,调用方则使用调用方的label值
     Text(`${this.label}`)
       .fontSize(20)
@@ -47,9 +48,11 @@ struct Page2 {
       Header({ title: 'Page2' })
       Column() {
         this.componentBuilder()
-        Child({ passBuilder: this.componentBuilder, cClick: () => {
-          promptAction.showToast({ message: `${this.label} out pass click event` })
-        } })
+        Child({
+          passBuilder: this.componentBuilder, cClick: () => {
+            promptAction.showToast({ message: `${this.label} out pass click event` })
+          }
+        })
 
         Child({ passBuilder: this.componentBuilder, cClick: this.pClick })
 
@@ -72,7 +75,7 @@ struct Child {
   label: string = `Child`
   //修饰外部传进来的函数是@Builder
   @BuilderParam passBuilder: () => void;
-  cClick: () => void;
+  cClick: (() => void) | null = null;
 
   build() {
     Column() {
