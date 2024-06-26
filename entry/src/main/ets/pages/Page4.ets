@@ -14,7 +14,7 @@ let mySum: (x: number, y: number) => number = (x: number, y: number): number => 
 }
 
 
-class PropB {
+export class PropB {
   code: number;
 
   constructor(code: number) {
@@ -29,6 +29,10 @@ class PropC {
     this.propB = propB;
   }
 }
+
+
+// AppStorage.setOrCreate('PropA', 47);
+// AppStorage.setOrCreate('PropB', new PropB(50));
 
 // 创建新实例并使用给定对象初始化
 let para: Record<string, number | string> = { 'PropA': 47, 'PropAA': "48" };
@@ -51,6 +55,9 @@ struct Page4 {
   //再嵌套一层识别不到
   @LocalStorageLink('PropC') parentLinkObject2: PropC = new PropC(new PropB(100));
   @LocalStorageProp('PropD') parentLinkNumber2: number = 1;
+  //全局无此key使用1,有key使用全局的
+  @StorageLink('PropA') storageLink: number = 1;
+  @StorageLink('PropB') storageLinkObject: PropB = new PropB(1);
 
   sum(x: number, y: number): number {
     return x + y;
@@ -102,10 +109,21 @@ struct Page4 {
         ChildLink()
           .margin({ bottom: 10 })
         ChildProp()
+          .margin({ bottom: 10 })
+
+        Button(`From AppStorage ${this.storageLink}`)
+          .onClick(() => {
+            this.storageLink += 1;
+          })
+
+        Button(`From AppStorage ${this.storageLinkObject.code}`)
+          .onClick(() => {
+            this.storageLinkObject.code += 1;
+          })
       }
       .width('100%')
       .height('100%')
-      .justifyContent(FlexAlign.Center)
+      .justifyContent(FlexAlign.Start)
     }
   }
 }
