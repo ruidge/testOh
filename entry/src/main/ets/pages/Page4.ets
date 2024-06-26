@@ -1,105 +1,182 @@
+import promptAction from '@ohos.promptAction'
 import hilog from '@ohos.hilog'
-import { Article } from '../bean/bean';
+import router from '@ohos.router'
 import { Header } from '../component/Header'
 
-@Entry
-@Component
-struct Page3 {
-  @State isListReachEnd: boolean = false;
-  @State articleList: Array<Article> = [
-    new Article('001', '第1篇文章', '文章简介内容'),
-    new Article('002', '第2篇文章', '文章简介内容'),
-    new Article('003', '第3篇文章', '文章简介内容'),
-    new Article('004', '第4篇文章', '文章简介内容'),
-    new Article('005', '第5篇文章', '文章简介内容'),
-    new Article('006', '第6篇文章', '文章简介内容'),
-    new Article('007', '第7篇文章', '文章简介内容'),
-    new Article('008', '第8篇文章', '文章简介内容'),
-    new Article('009', '第9篇文章', '文章简介内容')
-  ]
 
-  loadMoreArticles() {
-    this.articleList.push(new Article('100', '加载的新文章', '文章简介内容'));
+function sum(x: number, y: number): number {
+  return x + y;
+}
+
+// 函数表达式（Function Expression）
+let mySum: (x: number, y: number) => number = (x: number, y: number): number => {
+  return x + y;
+}
+
+
+class PropB {
+  code: number;
+
+  constructor(code: number) {
+    this.code = code;
+  }
+}
+
+class PropC {
+  propB: PropB;
+
+  constructor(propB: PropB) {
+    this.propB = propB;
+  }
+}
+
+// 创建新实例并使用给定对象初始化
+let para: Record<string, number | string> = { 'PropA': 47, 'PropAA': "48" };
+let para2: Map<string, number | string> = new Map
+para2.set('PropA', 47)
+para2.set('PropAA', "48")
+let storage: LocalStorage = new LocalStorage(para);
+storage.setOrCreate('PropB', new PropB(50));
+storage.setOrCreate('PropC', new PropC(new PropB(100)));
+storage.setOrCreate('PropD', 200);
+
+
+@Entry(storage)
+@Component
+struct Page4 {
+  @State num3: number = 100
+  @LocalStorageLink('PropA') parentLinkNumber: number = 1;
+  //一层嵌套可以识别到属性的变化
+  @LocalStorageLink('PropB') parentLinkObject: PropB = new PropB(0);
+  //再嵌套一层识别不到
+  @LocalStorageLink('PropC') parentLinkObject2: PropC = new PropC(new PropB(100));
+  @LocalStorageProp('PropD') parentLinkNumber2: number = 1;
+
+  sum(x: number, y: number): number {
+    return x + y;
+  }
+
+  mySum: (x: number, y: number) => number = (x: number, y: number): number => {
+    return x + y;
+  }
+
+  @Builder
+  childBuilder() {
+    Button(`childBuilder`)
   }
 
   build() {
     Column() {
       Header({ title: 'Page4' })
-      List() {
-        //keyGenerator缺省为index + '__' + JSON.stringify(item)
-        //在插入数据场景下,使用缺省会导致插入位置之后重新创建,返回index会导致两次index错乱问题
-        ForEach(this.articleList, (item: Article) => {
-          ListItem() {
-            ArticleCard({ article: item })
-              .margin({ top: 10 })
+      Column() {
+        Child({
+          passBuilder: this.childBuilder, cClick: () => {
+            promptAction.showToast({ message: `child click` })
           }
-        }, (item: Article) => item.id)
-      }
-      .onReachEnd(() => {
-        this.isListReachEnd = true;
-      })
-      .parallelGesture(
-        PanGesture({ direction: PanDirection.Up, distance: 80 })
-          .onActionStart(() => {
-            if (this.isListReachEnd) {
-              this.loadMoreArticles();
-              this.isListReachEnd = false;
-            }
+        })
+          .margin({ bottom: 10 })
+        Button(`Parent from LocalStorage ${this.parentLinkNumber}`)
+          .onClick(() => {
+            this.parentLinkNumber += 1;
           })
-      )
-      .scrollBar(BarState.On)
+        Button(`Parent from LocalStorage ${this.parentLinkObject.code}`)
+          .onClick(() => {
+            this.parentLinkObject.code += 1;
+          })
+        Button(`Parent2 from LocalStorage ${this.parentLinkObject2.propB.code}`)
+          .onClick(() => {
+            //改变嵌套对象的属性的值,页面不会刷新
+            // this.parentLinkObject2.propB.code += 1;
+            //这里取出已经改变的值(比如在child点击的),赋值新对象,然后会触发页面刷新
+            let code = this.parentLinkObject2.propB.code += 1;
+            this.parentLinkObject2.propB = new PropB(code)
+
+          })
+        Button(`ParentD from LocalStorage ${this.parentLinkNumber2}`)
+          .onClick(() => {
+            //这里改变只影响当前组件,不会影响到全局
+            this.parentLinkNumber2 += 1;
+          })
+          .margin({ bottom: 10 })
+
+        ChildLink()
+          .margin({ bottom: 10 })
+        ChildProp()
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
     }
-    .width('100%')
-    .height('100%')
+  }
+}
+
+@Component
+struct Child {
+  label: string = `Child`
+  //修饰外部传进来的函数是@Builder
+  @BuilderParam passBuilder: () => void;
+  cClick: (() => void) | null = null;
+
+  build() {
+    Column() {
+      this.passBuilder()
+    }.onClick(this.cClick)
   }
 }
 
 
 @Component
-struct ArticleCard {
-  // @ObjectLink
-  article: Article | null = null;
+struct ChildLink {
+  @LocalStorageLink('PropA') childLinkNumber: number = 1;
+  @LocalStorageLink('PropB') childLinkObject: PropB = new PropB(0);
+  @LocalStorageLink('PropC') childLinkObject2: PropC = new PropC(new PropB(100));
+  @LocalStorageProp('PropD') childLinkNumber2: number = 1;
 
   build() {
-    Row() {
-      Image($r('app.media.icon'))
-        .width(80)
-        .height(80)
-        .margin({ right: 20 })
-
-      Column() {
-        Text(this.article?.title)
-          .fontSize(20)
-          .margin({ bottom: 8 })
-        Text(this.article?.brief)
-          .fontSize(16)
-          .fontColor(Color.Gray)
-          .margin({ bottom: 8 })
-        Text(this.article?.liked + "")
-          .fontSize(16)
-          .fontColor(Color.Gray)
-          .margin({ bottom: 8 })
-        Text(this.article?.count + "")
-          .fontSize(16)
-          .fontColor(Color.Gray)
-          .margin({ bottom: 8 })
-      }
-      .alignItems(HorizontalAlign.Start)
-      .width('80%')
-      .height('100%')
+    Column() {
+      Button(`ChildLink from LocalStorage ${this.childLinkNumber}`)
+        .onClick(() => {
+          this.childLinkNumber += 1;
+        })
+      Button(`ChildLink from LocalStorage ${this.childLinkObject.code}`)
+        .onClick(() => {
+          this.childLinkObject.code += 1;
+        })
+      Button(`ChildLink2 from LocalStorage ${this.childLinkObject2.propB.code}`)
+        .onClick(() => {
+          //这里点击只会改变嵌套对象的属性的值,但是页面并不会刷新
+          this.childLinkObject2.propB.code += 1;
+        })
+      Button(`ChildLink from LocalStorage ${this.childLinkNumber2}`)
+        .onClick(() => {
+          //这里改变只影响当前组件,不会影响到全局
+          this.childLinkNumber2 += 1;
+        })
     }
-    .onClick(() => {
-      if (this.article != null) {
-        this.article.liked = true
-        this.article.count++
-      }
-    })
-    .margin({ left: 20, right: 20 })
-    .padding({ left: 20, right: 20 })
-    .borderRadius(12)
-    .backgroundColor('#FFECECEC')
-    .height(120)
-    .width('100%')
-    .justifyContent(FlexAlign.SpaceBetween)
+  }
+}
+
+@Component
+struct ChildProp {
+  @LocalStorageProp('PropA') childLinkNumber: number = 1;
+  @LocalStorageProp('PropB') childLinkObject: PropB = new PropB(0);
+  @LocalStorageLink('PropD') childLinkNumber2: number = 1;
+
+  build() {
+    Column() {
+      Button(`ChildProp from LocalStorage ${this.childLinkNumber}`)
+        .onClick(() => {
+          this.childLinkNumber += 1;
+        })
+      Button(`ChildProp from LocalStorage ${this.childLinkObject.code}`)
+        .onClick(() => {
+          this.childLinkObject.code += 1;
+        })
+      Button(`ChildPropD from LocalStorage ${this.childLinkNumber2}`)
+        .onClick(() => {
+          //因为这里是link的,这里改变会影响到全局,从而影响到其他prop的
+          this.childLinkNumber2 += 1;
+        })
+    }
   }
 }

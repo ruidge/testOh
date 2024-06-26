@@ -95,6 +95,11 @@ struct Index {
               router.pushUrl({ url: 'pages/Page4' });
             })
             .margin({ top: 10 })
+          Button('push to page5')
+            .onClick(() => {
+              router.pushUrl({ url: 'pages/Page5' });
+            })
+            .margin({ top: 10 })
         }
         .width('100%')
         //默认为居中
