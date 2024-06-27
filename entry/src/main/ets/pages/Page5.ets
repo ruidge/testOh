@@ -34,6 +34,7 @@ class LogNotTrack {
 @Entry(storage)
 @Component
 struct Page5 {
+  @State isRefreshing: boolean = false
   scroller = new Scroller()
   @State @Watch('num3Changed') num3: number = 100
   @State num4: number = 0
@@ -51,128 +52,140 @@ struct Page5 {
   @State logNotTrack: LogNotTrack = new LogNotTrack('你好');
   @State log: Log = new Log('origin info.');
 
+  //因为这个builder是传入child的,所以这里的this指向的是child,
+  //此时需要child里面包含num3属性,如果不包含值为undefined,而不是父组件的num3.
   @Builder
   childBuilder() {
     Button(`childBuilder num3:${this.num3}`)
   }
 
   //该方法不在build中,通过@Watch也可以监听num3的变化
-  num3Changed(num: number) {
-    promptAction.showToast({ message: `num:${num};num3:${this.num3}` })
+  num3Changed(param: string) {
+    promptAction.showToast({ message: `param:${param};num3:${this.num3}` })
     this.num4 = this.num3 + 100
   }
 
   build() {
     Column() {
-      Header({ title: 'Page5' })
+      Header({ title: `Page5 :${AppStorage.get('languageCode')}` })
       Scroll(this.scroller) {
-        Column() {
-          Text(`num3:${this.num3};num4:${this.num4}`)
-          Child({
-            passBuilder: this.childBuilder, cClick: () => {
-              this.num3++
-            }
-          })
-            .margin({ bottom: 10 })
-          Button(`From AppStorage ${this.storageLink}`)
-            .onClick(() => {
-              this.storageLink += 1;
+        Refresh({ refreshing: $$this.isRefreshing }) {
+          Column() {
+            Text(`num3:${this.num3};num4:${this.num4}`)
+            Child({
+              num3: this.num3,
+              passBuilder: this.childBuilder, cClick: () => {
+                this.num3++
+              }
             })
+              .margin({ bottom: 10 })
+            Button(`From AppStorage ${this.storageLink}`)
+              .onClick(() => {
+                this.storageLink += 1;
+              })
 
-          Button(`From LocalStorage ${this.localStorageLink}`)
-            .onClick(() => {
-              this.localStorageLink += 1;
+            Button(`From LocalStorage ${this.localStorageLink}`)
+              .onClick(() => {
+                this.localStorageLink += 1;
+              })
+
+            Button(`From AppStorage ${this.storageLinkObject.code}`)
+              .onClick(() => {
+                this.storageLinkObject.code += 1;
+              })
+
+            Button(`From LocalStorage ${this.localStorageLinkObject.code}`)
+              .onClick(() => {
+                this.localStorageLinkObject.code += 1;
+              })
+              .margin({ bottom: 10 })
+
+            ForEach(Array.from(this.message.entries()), (item: [number, string]) => {
+              Text(`${item[0]}`).fontSize(20)
+              Text(`${item[1]}`).fontSize(20)
+              Divider()
             })
-
-          Button(`From AppStorage ${this.storageLinkObject.code}`)
-            .onClick(() => {
-              this.storageLinkObject.code += 1;
+            Button('init map').onClick(() => {
+              this.message = new Map([[0, "a"], [1, "b"], [3, "c"]]);
             })
-
-          Button(`From LocalStorage ${this.localStorageLinkObject.code}`)
-            .onClick(() => {
-              this.localStorageLinkObject.code += 1;
+            Button('set new one').onClick(() => {
+              this.message.set(4, "d");
             })
-            .margin({ bottom: 10 })
-
-          ForEach(Array.from(this.message.entries()), (item: [number, string]) => {
-            Text(`${item[0]}`).fontSize(20)
-            Text(`${item[1]}`).fontSize(20)
-            Divider()
-          })
-          Button('init map').onClick(() => {
-            this.message = new Map([[0, "a"], [1, "b"], [3, "c"]]);
-          })
-          Button('set new one').onClick(() => {
-            this.message.set(4, "d");
-          })
-          Button('clear').onClick(() => {
-            this.message.clear();
-          })
-          Button('replace the existing one').onClick(() => {
-            this.message.set(0, "aa");
-          })
-          Button('delete the existing one').onClick(() => {
-            let result = AppStorage.get<Map<number, string>>("map")?.delete(0);
-            if (!result) {
-              AppStorage.get<Map<number, string>>("map")?.delete(1);
-            }
-          })
-            .margin({ bottom: 10 })
-
-          Text(this.text)
-          //$$引用初始值,修改会同步回去
-          TextInput({ text: $$this.text, placeholder: 'input your word...', controller: this.controller })
-            .placeholderColor(Color.Grey)
-            .placeholderFont({ size: 14, weight: 400 })
-            .caretColor(Color.Blue)
-            .width(300)
-            .margin({ bottom: 10 })
-
-          Text(this.logTrack.str1)// UINode1
-            .fontSize(this.isRender(1))
-            .fontWeight(FontWeight.Bold)
-          Text(this.logTrack.str2)// UINode2
-            .fontSize(this.isRender(2))
-            .fontWeight(FontWeight.Bold)
-          Button('change logTrack.str1')
-            .onClick(() => {
-              //点击后只有1刷新
-              this.logTrack.str1 = 'Bye';
+            Button('clear').onClick(() => {
+              this.message.clear();
             })
-          Text(this.logNotTrack.str1)// UINode3
-            .fontSize(this.isRender(3))
-            .fontWeight(FontWeight.Bold)
-          Text(this.logNotTrack.str2)// UINode4
-            .fontSize(this.isRender(4))
-            .fontWeight(FontWeight.Bold)
-          Button('change logNotTrack.str1')
-            .onClick(() => {
-              //点击后3,4都刷新
-              this.logNotTrack.str1 = '再见';
+            Button('replace the existing one').onClick(() => {
+              this.message.set(0, "aa");
             })
-
-          Text(`${JSON.stringify(this.log)}`)
-            .fontSize(20)
-            .fontWeight(FontWeight.Bold)
-            .onClick(() => {
-              // The properties without @Track can be used in the event handler.
-              console.log('owner: ' + this.log.owner +
-                ' id: ' + this.log.id +
-                ' time: ' + this.log.time +
-                ' location: ' + this.log.location +
-                ' reason: ' + this.log.reason);
-              this.log.time = new Date();
-              this.log.id++;
-
-              // this.log.logInfo += ' info.';
+            Button('delete the existing one').onClick(() => {
+              let result = AppStorage.get<Map<number, string>>("map")?.delete(0);
+              if (!result) {
+                AppStorage.get<Map<number, string>>("map")?.delete(1);
+              }
             })
+              .margin({ bottom: 10 })
 
-            .margin({ bottom: 100 })
+            Text(this.text)
+            //$$引用初始值,修改会同步回去
+            TextInput({ text: $$this.text, placeholder: 'input your word...', controller: this.controller })
+              .placeholderColor(Color.Grey)
+              .placeholderFont({ size: 14, weight: 400 })
+              .caretColor(Color.Blue)
+              .width(300)
+              .margin({ bottom: 10 })
+
+            Text(this.logTrack.str1)// UINode1
+              .fontSize(this.isRender(1))
+              .fontWeight(FontWeight.Bold)
+            Text(this.logTrack.str2)// UINode2
+              .fontSize(this.isRender(2))
+              .fontWeight(FontWeight.Bold)
+            Button('change logTrack.str1')
+              .onClick(() => {
+                //点击后只有1刷新
+                this.logTrack.str1 = 'Bye';
+              })
+            Text(this.logNotTrack.str1)// UINode3
+              .fontSize(this.isRender(3))
+              .fontWeight(FontWeight.Bold)
+            Text(this.logNotTrack.str2)// UINode4
+              .fontSize(this.isRender(4))
+              .fontWeight(FontWeight.Bold)
+            Button('change logNotTrack.str1')
+              .onClick(() => {
+                //点击后3,4都刷新
+                this.logNotTrack.str1 = '再见';
+              })
+
+            Text(`${JSON.stringify(this.log)}`)
+              .fontSize(20)
+              .fontWeight(FontWeight.Bold)
+              .onClick(() => {
+                // The properties without @Track can be used in the event handler.
+                console.log('owner: ' + this.log.owner +
+                  ' id: ' + this.log.id +
+                  ' time: ' + this.log.time +
+                  ' location: ' + this.log.location +
+                  ' reason: ' + this.log.reason);
+                this.log.time = new Date();
+                this.log.id++;
+
+                // this.log.logInfo += ' info.';
+              })
+
+              .margin({ bottom: 100 })
+          }
+          .width('100%')
+          // .height('100%')
+          .justifyContent(FlexAlign.Start)
         }
-        .width('100%')
-        // .height('100%')
-        .justifyContent(FlexAlign.Start)
+        .onRefreshing(() => {
+          setTimeout(() => {
+            this.isRefreshing = false
+          }, 2000)
+        })
+        .pullToRefresh(true)
+        .refreshOffset(50)
       }
       .scrollable(ScrollDirection.Vertical)
     }
@@ -187,6 +200,7 @@ struct Page5 {
 @Component
 struct Child {
   label: string = `Child`
+  @Link num3: number
   //修饰外部传进来的函数是@Builder
   @BuilderParam passBuilder: () => void;
   cClick: (() => void) | null = null;

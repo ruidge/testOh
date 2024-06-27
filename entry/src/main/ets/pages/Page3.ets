@@ -65,6 +65,7 @@ class ClassB {
 @Component
 struct ViewA {
   label: string = "ep1";
+  //ClassA需用@Observed装饰,实现嵌套对象变化可识别
   @ObjectLink a: ClassA;
 
   build() {

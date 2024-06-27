@@ -3,6 +3,9 @@ import hilog from '@ohos.hilog'
 import router from '@ohos.router'
 import { Header } from '../component/Header'
 
+
+Environment.envProp('languageCode', 'zh');
+
 @Entry
 @Component
 struct Index {
@@ -54,12 +57,10 @@ struct Index {
   @Builder
   doContentRender() {
     Text(this.message)
-      .fontSize(50)
-        // .width('100%')
+      .fontSize(50)// .width('100%')
         // .height('100%')
         // .textAlign(TextAlign.Center)
-      .fontWeight(FontWeight.Bold)
-        //使用声明的箭头函数，可以直接调用，不需要bind this
+      .fontWeight(FontWeight.Bold)//使用声明的箭头函数，可以直接调用，不需要bind this
       .onClick((event) => {
         this.message = `Clicked Text `
         // promptAction.showToast({ message: `x:${event.x},y:${event.y}` })
@@ -73,42 +74,51 @@ struct Index {
     Column() {
       Header({ title: 'home', showBack: false })
       Row() {
-        Column() {
-          this.doAuthorRender()
-          LineDivider({ color: Color.Blue, lHeight: 2 })
-          Row() {
-            this.doContentRender()
-          }
+        Scroll() {
+          Column() {
+            this.doAuthorRender()
+            LineDivider({ color: Color.Blue, lHeight: 2 })
+            Row() {
+              this.doContentRender()
+            }
 
-          Button('push to page2')
-            .onClick(() => {
-              router.pushUrl({ url: 'pages/Page2' });
-            })
-            .margin({ top: 10 })
-          Button('push to page3')
-            .onClick(() => {
-              router.pushUrl({ url: 'pages/Page3' });
-            })
-            .margin({ top: 10 })
-          Button('push to page4')
-            .onClick(() => {
-              router.pushUrl({ url: 'pages/Page4' });
-            })
-            .margin({ top: 10 })
-          Button('push to page5')
-            .onClick(() => {
-              router.pushUrl({ url: 'pages/Page5' });
-            })
-            .margin({ top: 10 })
+            Button('push to page2')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page2' });
+              })
+              .margin({ top: 10 })
+            Button('push to page3')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page3' });
+              })
+              .margin({ top: 10 })
+            Button('push to page4')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page4' });
+              })
+              .margin({ top: 10 })
+            Button('push to page5')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page5' });
+              })
+              .margin({ top: 10 })
+            Button('push to page6')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page6' });
+              })
+              .margin({ top: 10 })
+
+            Button('push to page100')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page100' });
+              })
+              .margin({ top: 100 })
+          }
+          .width('100%')
+          //默认为居中
+          .alignItems(HorizontalAlign.Center)
         }
-        .width('100%')
-        //默认为居中
-        .alignItems(HorizontalAlign.Center)
-        //使用匿名函数表达式配置组件的事件方法，要求使用bind，以确保函数体中的this指向当前组件
-        //update: 11开始不支持
-        // .onClick(function(event){
-        //   this.message = 'Clicked Column '
-        // }.bind(this))
+        .scrollable(ScrollDirection.Vertical)
       }
       //默认为居中
       // .alignItems(VerticalAlign.Bottom)

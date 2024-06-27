@@ -21,6 +21,9 @@ export default class EntryAbility extends UIAbility {
         return;
       }
       hilog.info(0x0000, 'testTag', 'Succeeded in loading the content. Data: %{public}s', JSON.stringify(data) ?? '');
+      PersistentStorage.persistProp('PropA', 1000);
+      let UIContext = windowStage.getMainWindowSync().getUIContext()
+      AppStorage.setOrCreate("UIContext", UIContext)
     });
   }
 
