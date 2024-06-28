@@ -65,6 +65,8 @@ function webBuilder(data: Data) {
     .height('100%')
 }
 
+//wrapBuilder方法只能传入全局@Builder方法。
+//wrapBuilder方法返回的WrappedBuilder对象的builder属性方法只能在struct内部使用。
 let wrap = wrapBuilder<Data[]>(webBuilder);
 
 /**

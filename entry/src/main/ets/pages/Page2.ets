@@ -74,6 +74,8 @@ struct Page2 {
             this.num2++
           })
 
+        //@Require修饰的必须赋值
+        // ChildState({})
         ChildState({ num: this.num1 })
         ChildProp({ num: this.num1 })
         ChildLink({ num: this.num1 })
@@ -105,7 +107,8 @@ struct Child {
 //@State修饰的父组件传入后,父组件修改不会同步到子组件,子组件的修改也不会同步父组件.
 @Component
 struct ChildState {
-  @State num: number = 0
+  //@Require修饰的必须赋值
+  @Require @State num: number = 0
 
   build() {
     Button(`ChildState ${this.num}`)

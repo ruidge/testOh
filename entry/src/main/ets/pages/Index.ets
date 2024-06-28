@@ -107,6 +107,11 @@ struct Index {
                 router.pushUrl({ url: 'pages/Page6' });
               })
               .margin({ top: 10 })
+            Button('push to page7')
+              .onClick(() => {
+                router.pushUrl({ url: 'pages/Page7' });
+              })
+              .margin({ top: 10 })
 
             Button('push to page100')
               .onClick(() => {
