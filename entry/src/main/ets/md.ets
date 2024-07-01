@@ -36,6 +36,7 @@ let t: Test = { value: 2 };
 
 class Test2 {
   value: number | undefined = 1
+  //是上面的语法糖,不如初始化值性能好
   value2?: number
 
   constructor(value?: number) {
@@ -68,6 +69,7 @@ try {
 interface A {
   foo: () => void
 }
+
 let a: A = {
   foo: () => {
   }
